@@ -55,9 +55,8 @@ class ViewController: UIViewController {
             if index < game.playableCards.count {
                 let card = game.playableCards[index]
                 
-                //TODO: Added test function here. Need to change it back and change button.setTitle to button.setAttributedTitle
-                let cardValue = cardFaceTestFunction(for : card)
-                button.setTitle(cardValue, for: UIControlState.normal)
+                let cardValue = setCardFaceValue(for: card)
+                button.setAttributedTitle(cardValue, for: UIControlState.normal)
                 button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
 
                 if game.selectedCards.contains(index) {
@@ -82,56 +81,85 @@ class ViewController: UIViewController {
     }
     
     func updateCardSelectionLabel() {
-        if game.selectedCards.count == 1 {
+        
+        var selectionString : NSMutableAttributedString = NSMutableAttributedString(string: "")
+        
+        if game.selectedCards.count > 0 {
             let card1 = game.playableCards[game.selectedCards[0]]
-            cardSelectionLabel.text = "Selection: \(cardFaceTestFunction(for: card1))"
+            selectionString = NSMutableAttributedString(string: "Selection: ")
+            selectionString.append(setCardFaceValue(for: card1))
+
         }
-        if game.selectedCards.count == 2 {
-            let card1 = game.playableCards[game.selectedCards[0]]
+        if game.selectedCards.count > 1 {
             let card2 = game.playableCards[game.selectedCards[1]]
-            cardSelectionLabel.text = "Selection: \(cardFaceTestFunction(for: card1)) + \(cardFaceTestFunction(for: card2))"
+            selectionString.append(NSAttributedString(string: " + "))
+            selectionString.append(setCardFaceValue(for: card2))
         }
-        if game.selectedCards.count == 3 {
-            let card1 = game.playableCards[game.selectedCards[0]]
-            let card2 = game.playableCards[game.selectedCards[1]]
+        if game.selectedCards.count > 2 {
             let card3 = game.playableCards[game.selectedCards[2]]
-            cardSelectionLabel.text = "Selection: \(cardFaceTestFunction(for: card1)) + \(cardFaceTestFunction(for: card2)) + \(cardFaceTestFunction(for: card3))"
+            selectionString.append(NSAttributedString(string: " + "))
+            selectionString.append(setCardFaceValue(for: card3))
         }
+        
+        cardSelectionLabel.attributedText = selectionString
+
     }
     
-    func cardFaceTestFunction(for card : Card) -> String{
+    func setCardFaceValue(for card : Card) -> NSAttributedString {
         
-        var val = ""
+        var shapeOnCard : String
         
-        val.append(String(card.number))
-        val.append(String(card.shape))
-        val.append(String(card.color))
-        val.append(String(card.shading))
+        switch card.shape {
+        case 0:
+            shapeOnCard = "▲"
+            break
+        case 1:
+            shapeOnCard = "■"
+            break
+        default:
+            shapeOnCard =  "●"
+        }
+        
+        var cardFaceText = ""
+        
+        for _ in 0...card.number {
+            cardFaceText.append(shapeOnCard)
+        }
+        
+        var cardColor : UIColor
+        
+        switch card.color {
+        case 0:
+            cardColor = UIColor.red
+            break
+        case 1:
+            cardColor = UIColor.green
+            break
+        default:
+            cardColor = UIColor.blue
+        }
+        
+        var attributes : [NSAttributedStringKey : Any]
+        
+        switch card.shading {
+        case 0:
+            attributes = [.strokeWidth : -3.0, .foregroundColor : cardColor]
+            break
+        case 1:
+            attributes = [.strokeWidth : -3.0, .foregroundColor : cardColor.withAlphaComponent(CGFloat(0.15))]
+            break
+        default:
+            attributes = [.strokeWidth : 3.0, .foregroundColor : cardColor]
 
-        return val
+        }
+        
+        let cardFaceValue = NSAttributedString(string: cardFaceText, attributes: attributes)
+        
+        return cardFaceValue
+        
     }
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

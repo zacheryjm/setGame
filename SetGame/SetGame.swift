@@ -25,8 +25,6 @@ class SetGame {
                 deck.remove(at: index)
             }
         }
-        
-        
     }
     
     func chooseCard(at index : Int) {
@@ -57,9 +55,7 @@ class SetGame {
         }
         else {
             selectedCards.append(index)
-
         }
-        
     }
     
     func checkForSet() -> Bool {
@@ -98,7 +94,7 @@ class SetGame {
                 }
             }
         }
-        
+    
         shuffle()
         
         let numPlayableCards = 12
@@ -106,9 +102,7 @@ class SetGame {
         for _ in 0..<numPlayableCards {
             playableCards.append(deck.removeFirst())
         }
-        
     }
-    
 
     func shuffle() {
         for index in 0..<deck.count {
