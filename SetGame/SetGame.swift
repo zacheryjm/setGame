@@ -33,11 +33,18 @@ class SetGame {
             selectedCards.removeAll()
             selectedCards.append(index)
         }
+        else if selectedCards.contains(index) {
+            if let indexToRemove = selectedCards.index(of: index) {
+                selectedCards.remove(at: indexToRemove)
+            }
+        }
         else if selectedCards.count == maxNumberOfSelectedCards-1 {
             selectedCards.append(index)
             
             if checkForSet() {
                 score += 1
+                selectedCards.removeAll()
+
                 
                 for i in selectedCards.indices {
                     playableCards.remove(at: i)

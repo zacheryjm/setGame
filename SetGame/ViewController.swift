@@ -38,7 +38,7 @@ class ViewController: UIViewController {
         
         if let cardIndex = cardButtons.index(of : sender) {
             
-            if (cardIndex < game.playableCards.count) && !(game.selectedCards.contains(cardIndex)) {
+            if (cardIndex < game.playableCards.count) {
                 game.chooseCard(at : cardIndex)
                 updateViewFromModel()
             }
