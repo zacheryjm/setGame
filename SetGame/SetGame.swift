@@ -9,27 +9,29 @@
 import Foundation
 
 class SetGame {
-    
+    let TOPCARD = 0
+    let MAXNUMBEROFSELECTEDCARDS = 3
+    let MAXNUMBEROFPLAYABLECARDS = 24
+
     var deck = [Card]()
-    let maxNumberOfPlayableCards = 24
     var playableCards = [Card]()
-    let maxNumberOfSelectedCards = 3
     var score = 0
     var selectedCards = [Int]()
+    var gameOver = false
     
     func dealThreeMoreCards() {
         
-        for index in 0..<3 {
-            if !deck.isEmpty && playableCards.count < maxNumberOfPlayableCards{
-                playableCards.append(deck[index])
-                deck.remove(at: index)
+        for _ in 0..<3 {
+            if !deck.isEmpty && playableCards.count < MAXNUMBEROFPLAYABLECARDS{
+                playableCards.append(deck[TOPCARD])
+                deck.remove(at: TOPCARD)
             }
         }
     }
     
     func chooseCard(at index : Int) {
         
-        if selectedCards.count == maxNumberOfSelectedCards {
+        if selectedCards.count == MAXNUMBEROFSELECTEDCARDS {
             selectedCards.removeAll()
             selectedCards.append(index)
         }
@@ -38,22 +40,26 @@ class SetGame {
                 selectedCards.remove(at: indexToRemove)
             }
         }
-        else if selectedCards.count == maxNumberOfSelectedCards-1 {
+        else if selectedCards.count == MAXNUMBEROFSELECTEDCARDS-1 {
             selectedCards.append(index)
             
             if checkForSet() {
                 score += 1
-                selectedCards.removeAll()
-
                 
-                for i in selectedCards.indices {
-                    playableCards.remove(at: i)
+                let selectedCardsSortedDecending = selectedCards.sorted(by: { $0 > $1 })
+                
+                for i in selectedCardsSortedDecending.indices {
+                    playableCards.remove(at: selectedCardsSortedDecending[i])
                     
-                    if !deck.isEmpty {
-                        playableCards.append(deck[i])
-                        deck.remove(at: i)
+                    if !deck.isEmpty && playableCards.count < 12 {
+                        playableCards.append(deck[TOPCARD])
+                        deck.remove(at: TOPCARD)
                     }
-                    
+                }
+                selectedCards.removeAll()
+                
+                if playableCards.isEmpty && deck.isEmpty {
+                    gameOver = true
                 }
             }
             else {
@@ -66,9 +72,9 @@ class SetGame {
     }
     
     func checkForSet() -> Bool {
-        
+
         var isASet = false
-        
+
         if ((playableCards[selectedCards[0]].number == playableCards[selectedCards[1]].number && playableCards[selectedCards[1]].number == playableCards[selectedCards[2]].number) ||
             (playableCards[selectedCards[0]].number != playableCards[selectedCards[1]].number && playableCards[selectedCards[1]].number != playableCards[selectedCards[2]].number && playableCards[selectedCards[0]].number != playableCards[selectedCards[2]].number))
             {
@@ -86,7 +92,7 @@ class SetGame {
                     }
                 }
         }
-        
+
         return isASet
     }
     

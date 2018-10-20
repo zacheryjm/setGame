@@ -18,6 +18,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var scoreLabel: UILabel!
     @IBOutlet weak var cardSelectionLabel: UILabel!
+    @IBOutlet weak var GameOverLabel: UILabel!
     
     
     @IBOutlet var cardButtons: [UIButton]!
@@ -46,6 +47,13 @@ class ViewController: UIViewController {
     }
     
     func updateViewFromModel() {
+        
+        if game.gameOver {
+            GameOverLabel.text = "Game Over!"
+            scoreLabel.text = "Final Score: \(game.score)"
+            cardSelectionLabel.text = ""
+
+        }
     
         for index in cardButtons.indices {
             
