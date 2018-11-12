@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C05883062197DA0A00B6F2C9 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C05883052197DA0A00B6F2C9 /* CardView.swift */; };
+		C058830A2197E83400B6F2C9 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = C05883092197E83400B6F2C9 /* Grid.swift */; };
 		C067A9A02156E04400DCF58E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C067A99F2156E04400DCF58E /* AppDelegate.swift */; };
 		C067A9A22156E04400DCF58E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C067A9A12156E04400DCF58E /* ViewController.swift */; };
 		C067A9A52156E04400DCF58E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C067A9A32156E04400DCF58E /* Main.storyboard */; };
@@ -36,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C05883052197DA0A00B6F2C9 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		C05883092197E83400B6F2C9 /* Grid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		C067A99C2156E04400DCF58E /* SetGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SetGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C067A99F2156E04400DCF58E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C067A9A12156E04400DCF58E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -102,6 +106,8 @@
 			isa = PBXGroup;
 			children = (
 				C067A9A12156E04400DCF58E /* ViewController.swift */,
+				C05883052197DA0A00B6F2C9 /* CardView.swift */,
+				C05883092197E83400B6F2C9 /* Grid.swift */,
 				C067A9CD21638D6500DCF58E /* SetGame.swift */,
 				C067A9CF21638DB000DCF58E /* Card.swift */,
 				C067A9A32156E04400DCF58E /* Main.storyboard */,
@@ -274,6 +280,8 @@
 				C067A9CE21638D6600DCF58E /* SetGame.swift in Sources */,
 				C067A9A02156E04400DCF58E /* AppDelegate.swift in Sources */,
 				C067A9D021638DB000DCF58E /* Card.swift in Sources */,
+				C05883062197DA0A00B6F2C9 /* CardView.swift in Sources */,
+				C058830A2197E83400B6F2C9 /* Grid.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

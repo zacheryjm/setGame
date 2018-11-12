@@ -11,167 +11,127 @@ import UIKit
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
-        updateViewFromModel()
+        updateView()
     }
-   
-    lazy var game = SetGame()
     
-    @IBOutlet weak var scoreLabel: UILabel!
-    @IBOutlet weak var cardSelectionLabel: UILabel!
-    @IBOutlet weak var GameOverLabel: UILabel!
-    
-    
-    @IBOutlet var cardButtons: [UIButton]!
-    @IBAction func NewGame(_ sender: UIButton) {
-        
+    // MARK: actions
+    @IBAction func NewGameButton(_ sender: UIButton) {
         game = SetGame()
-        cardSelectionLabel.text = ""
-        updateViewFromModel()
+        updateView()
     }
-    
-    @IBAction func DealThreeMoreCardsButton(_ sender: UIButton) {
+    @IBAction func DealThreeCardsButton(_ sender: UIButton) {
         game.dealThreeMoreCards()
-        updateViewFromModel()
-        
+        updateView()
     }
     
-    @IBAction func touchCard(_ sender: UIButton) {
-        
-        if let cardIndex = cardButtons.index(of : sender) {
+    @IBAction func touchCard(_ sender: UITapGestureRecognizer) {
+        if sender.state == .ended {
+            let location = sender.location(in: cardsInPlayView)
             
-            if (cardIndex < game.playableCards.count) {
-                game.chooseCard(at : cardIndex)
-                updateViewFromModel()
-            }
-        }
-    }
-    
-    func updateViewFromModel() {
-        
-        if game.gameOver {
-            GameOverLabel.text = "Game Over!"
-            scoreLabel.text = "Final Score: \(game.score)"
-            cardSelectionLabel.text = ""
-
-        }
-    
-        for index in cardButtons.indices {
-            
-            let button = cardButtons[index]
-            button.layer.borderWidth = 0.0
-
-            if index < game.playableCards.count {
-                let card = game.playableCards[index]
-                
-                let cardValue = setCardFaceValue(for: card)
-                button.setAttributedTitle(cardValue, for: UIControlState.normal)
-                button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-
-                if game.selectedCards.contains(index) {
-                    button.layer.borderWidth = 3.0
-                    button.layer.borderColor = UIColor.yellow.cgColor
+            if let tappedView = cardsInPlayView.hitTest(location, with: nil) {
+                if let cardIndex = cardsInPlayView.subviews.index(of: tappedView) {
+                    game.chooseCard(at: cardIndex)
+                    updateView()
                 }
-                
-                scoreLabel.text = "Score: \(game.score)"
-                updateCardSelectionLabel()
-
             }
-            else {
-                
-                button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
-                button.setAttributedTitle(nil, for: UIControlState.normal)
-                button.setTitle(nil, for: UIControlState.normal)
+        }
+    }
+    
+    @IBAction func handleSwipeDown(_ sender: UISwipeGestureRecognizer) {
+        if sender.state == .ended {
+            game.dealThreeMoreCards()
+            updateView()
+        }
+    }
+    @IBAction func handleRotationGesture(_ sender: UIRotationGestureRecognizer) {
+        if sender.state == .ended {
+            game.shufflePlayableCards()
+            updateView()
+        }
+    }
+    
+    // MARK: outlets
+    @IBOutlet weak var scoreLabel: UILabel!
+    @IBOutlet weak var cardsInPlayView: UIView!
+    
+    // MARK: properties
+    private lazy var game = SetGame()
+    private lazy var grid = Grid(layout: .aspectRatio(CardSize.aspectRatio),frame: cardsInPlayView.bounds)
 
+    
+    // MARK: public functions
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        addCardViewsToGrid()
+    }
+    
+    // MARK: private functions
+
+    private func updateView() {
+        updateScoreLabel()
+        addCardViewsToGrid()
+        addBorders()
+    }
+    
+    private func updateScoreLabel() {
+        if game.gameOver {
+            scoreLabel.text = "Game Over! Final Score: \(game.score)"
+        }
+        scoreLabel.text = "Score: \(game.score)"
+    }
+    
+    private func addCardViewsToGrid() {
+        grid.frame = cardsInPlayView.bounds
+        grid.cellCount = game.playableCards.count
+        
+        for cardView in cardsInPlayView.subviews {
+            cardView.removeFromSuperview()
+        }
+        
+        for index in 0..<grid.cellCount {
+            if let cellFrame = grid[index] {
+                let card = game.playableCards[index]
+                let cardView = CardView(frame: cellFrame.insetBy(dx: CardSize.inset, dy: CardSize.inset),
+                                        color : card.color, number : card.number,
+                                        shading :  card.shading, shape : card.shape)
+                
+                cardsInPlayView.addSubview(cardView)
+            } else {
+                print("grid[\(index)] does not exist")
             }
+        }
+    }
+    
+    private func addBorders() {
+        let selectedCards = game.selectedCards
+        let playableCards = game.playableCards
+        
+        for index in playableCards.indices {
+            let cardView = cardsInPlayView.subviews[index] as! CardView
             
+            if selectedCards.contains(index) {
+                cardView.borderWidth = CardSize.borderWidth
+                
+                if selectedCards.count < 3 {
+                    cardView.borderColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
+                } else {
+                    cardView.borderColor = game.checkForSet() ? #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1) : #colorLiteral(red: 0.7450980544, green: 0.1568627506, blue: 0.07450980693, alpha: 1)
+                }
+            } else {
+                cardView.borderWidth = 0.0
+            }
         }
-        
     }
-    
-    func updateCardSelectionLabel() {
-        
-        var selectionString : NSMutableAttributedString = NSMutableAttributedString(string: "")
-        
-        if game.selectedCards.count > 0 {
-            let card1 = game.playableCards[game.selectedCards[0]]
-            selectionString = NSMutableAttributedString(string: "Selection: ")
-            selectionString.append(setCardFaceValue(for: card1))
-
-        }
-        if game.selectedCards.count > 1 {
-            let card2 = game.playableCards[game.selectedCards[1]]
-            selectionString.append(NSAttributedString(string: " + "))
-            selectionString.append(setCardFaceValue(for: card2))
-        }
-        if game.selectedCards.count > 2 {
-            let card3 = game.playableCards[game.selectedCards[2]]
-            selectionString.append(NSAttributedString(string: " + "))
-            selectionString.append(setCardFaceValue(for: card3))
-        }
-        
-        cardSelectionLabel.attributedText = selectionString
-
-    }
-    
-    func setCardFaceValue(for card : Card) -> NSAttributedString {
-        
-        var shapeOnCard : String
-        
-        switch card.shape {
-        case 0:
-            shapeOnCard = "▲"
-            break
-        case 1:
-            shapeOnCard = "■"
-            break
-        default:
-            shapeOnCard =  "●"
-        }
-        
-        var cardFaceText = ""
-        
-        for _ in 0...card.number {
-            cardFaceText.append(shapeOnCard)
-        }
-        
-        var cardColor : UIColor
-        
-        switch card.color {
-        case 0:
-            cardColor = UIColor.red
-            break
-        case 1:
-            cardColor = UIColor.green
-            break
-        default:
-            cardColor = UIColor.blue
-        }
-        
-        var attributes : [NSAttributedStringKey : Any]
-        
-        switch card.shading {
-        case 0:
-            attributes = [.strokeWidth : -3.0, .foregroundColor : cardColor]
-            break
-        case 1:
-            attributes = [.strokeWidth : -3.0, .foregroundColor : cardColor.withAlphaComponent(CGFloat(0.15))]
-            break
-        default:
-            attributes = [.strokeWidth : 3.0, .foregroundColor : cardColor]
-
-        }
-        
-        let cardFaceValue = NSAttributedString(string: cardFaceText, attributes: attributes)
-        
-        return cardFaceValue
-        
-    }
-    
 }
 
-
-
-
+extension ViewController {
+    private struct CardSize {
+        static let aspectRatio: CGFloat = 0.7
+        static let borderWidth: CGFloat = 2.0
+        static let inset: CGFloat = 4.0
+    }
+}
 
 
 

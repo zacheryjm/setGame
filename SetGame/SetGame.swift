@@ -9,20 +9,46 @@
 import Foundation
 
 class SetGame {
+    
+    // MARK: constants
     let TOPCARD = 0
     let MAXNUMBEROFSELECTEDCARDS = 3
-    let MAXNUMBEROFPLAYABLECARDS = 24
 
+    // MARK: properties
     var deck = [Card]()
     var playableCards = [Card]()
     var score = 0
     var selectedCards = [Int]()
     var gameOver = false
     
+    // MARK: init
+    init() {
+        for number in 0..<3 {
+            for shape in 0..<3 {
+                for color in 0..<3 {
+                    for shading in 0..<3 {
+                        let card = Card(number: number, shape: shape, color: color, shading: shading)
+                        deck.append(card)
+                    }
+                }
+            }
+        }
+        
+        shuffle()
+        
+        let numPlayableCards = 12
+        
+        for _ in 0..<numPlayableCards {
+            playableCards.append(deck.removeFirst())
+        }
+    }
+    
+    // MARK: public functions
+
     func dealThreeMoreCards() {
         
         for _ in 0..<3 {
-            if !deck.isEmpty && playableCards.count < MAXNUMBEROFPLAYABLECARDS{
+            if !deck.isEmpty {
                 playableCards.append(deck[TOPCARD])
                 deck.remove(at: TOPCARD)
             }
@@ -96,34 +122,23 @@ class SetGame {
         return isASet
     }
     
-    init() {
-        for number in 0..<3 {
-            for shape in 0..<3 {
-                for color in 0..<3 {
-                    for shading in 0..<3 {
-                        let card = Card(number: number, shape: shape, color: color, shading: shading)
-                        deck.append(card)
-                    }
-                }
-            }
-        }
-    
-        shuffle()
-        
-        let numPlayableCards = 12
-        
-        for _ in 0..<numPlayableCards {
-            playableCards.append(deck.removeFirst())
+    func shufflePlayableCards() {
+        for index in 0..<playableCards.count {
+            let rand = Int(arc4random_uniform(UInt32(playableCards.count)))
+            let card = playableCards[index]
+            playableCards[index] = playableCards[rand]
+            playableCards[rand] = card
         }
     }
 
-    func shuffle() {
+    // MARK: private functions
+
+    private func shuffle() {
         for index in 0..<deck.count {
             let rand = Int(arc4random_uniform(UInt32(deck.count)))
             let card = deck[index]
             deck[index] = deck[rand]
             deck[rand] = card
-            
         }
     }
     
