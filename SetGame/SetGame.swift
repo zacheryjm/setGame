@@ -43,63 +43,10 @@ class SetGame {
         }
     }
     
-    // MARK: public functions
-
-    func dealThreeMoreCards() {
-        
-        for _ in 0..<3 {
-            if !deck.isEmpty {
-                playableCards.append(deck[TOPCARD])
-                deck.remove(at: TOPCARD)
-            }
-        }
-    }
-    
-    func chooseCard(at index : Int) {
-        
-        if selectedCards.count == MAXNUMBEROFSELECTEDCARDS {
-            selectedCards.removeAll()
-            selectedCards.append(index)
-        }
-        else if selectedCards.contains(index) {
-            if let indexToRemove = selectedCards.index(of: index) {
-                selectedCards.remove(at: indexToRemove)
-            }
-        }
-        else if selectedCards.count == MAXNUMBEROFSELECTEDCARDS-1 {
-            selectedCards.append(index)
-            
-            if checkForSet() {
-                score += 1
-                
-                let selectedCardsSortedDecending = selectedCards.sorted(by: { $0 > $1 })
-                
-                for i in selectedCardsSortedDecending.indices {
-                    playableCards.remove(at: selectedCardsSortedDecending[i])
-                    
-                    if !deck.isEmpty && playableCards.count < 12 {
-                        playableCards.append(deck[TOPCARD])
-                        deck.remove(at: TOPCARD)
-                    }
-                }
-                selectedCards.removeAll()
-                
-                if playableCards.isEmpty && deck.isEmpty {
-                    gameOver = true
-                }
-            }
-            else {
-                score -= 1
-            }
-        }
-        else {
-            selectedCards.append(index)
-        }
-    }
-    
+    // MARK: public functions    
     func checkForSet() -> Bool {
 
-        var isASet = false
+        var isASet = true
 
         if ((playableCards[selectedCards[0]].number == playableCards[selectedCards[1]].number && playableCards[selectedCards[1]].number == playableCards[selectedCards[2]].number) ||
             (playableCards[selectedCards[0]].number != playableCards[selectedCards[1]].number && playableCards[selectedCards[1]].number != playableCards[selectedCards[2]].number && playableCards[selectedCards[0]].number != playableCards[selectedCards[2]].number))

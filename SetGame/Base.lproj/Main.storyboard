@@ -32,8 +32,11 @@
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NVH-R9-4DT">
                                         <rect key="frame" x="0.0" y="0.0" width="129" height="54"/>
+                                        <color key="backgroundColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="35"/>
-                                        <state key="normal" title="Deal!"/>
+                                        <state key="normal" title="Deal">
+                                            <color key="titleColor" red="0.99404761900000005" green="0.9880952381" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                        </state>
                                         <connections>
                                             <action selector="DealThreeCardsButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="P0e-Bq-N1D"/>
                                         </connections>
@@ -83,6 +86,7 @@
                     </view>
                     <connections>
                         <outlet property="cardsInPlayView" destination="eNv-G1-2MA" id="V3f-YJ-NWD"/>
+                        <outlet property="deckButton" destination="NVH-R9-4DT" id="bLA-nD-bCE"/>
                         <outlet property="scoreLabel" destination="dQb-Be-tux" id="R75-Kn-ioQ"/>
                         <outlet property="view" destination="8bC-Xf-vdC" id="9cH-UV-bft"/>
                     </connections>

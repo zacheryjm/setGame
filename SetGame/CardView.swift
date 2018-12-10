@@ -17,6 +17,9 @@ class CardView: UIView {
     var shading : Int
     var shape : Int
     
+    var isFaceUp = false
+    var isMatched = false
+    
     var borderColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0).cgColor {
         didSet {
             layer.borderColor = borderColor
@@ -49,7 +52,11 @@ class CardView: UIView {
         super.draw(rect)
         grid.frame = bounds
         drawBackground()
-        drawShapes()
+        
+        if isFaceUp {
+            drawShapes()
+
+        }
     }
     
     // MARK: private methods
@@ -80,12 +87,17 @@ class CardView: UIView {
             print("unable to get graphics context in drawBackground()")
             return
         }
-        Color.white.setFill()
+        UIColor.init(white: 1.0, alpha: 1.0).setFill()
         graphicsContext.fill(bounds)
         
         // draw rectangle with rounded corners
         let roundedRect = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius)
-        Color.cardBackgroundColor.setFill()
+        if isFaceUp {
+            Color.cardBackgroundColor.setFill()
+        }
+        else {
+            Color.faceDownBackgroundColor.setFill()
+        }
         roundedRect.fill()
     }
     
@@ -187,6 +199,7 @@ extension CardView {
     private struct Color {
         static let white = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         static let cardBackgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
+        static let faceDownBackgroundColor = #colorLiteral(red: 0.01680417731, green: 0.1983509958, blue: 1, alpha: 1)
         static let green = #colorLiteral(red: 0.1294117719, green: 0.2156862766, blue: 0.06666667014, alpha: 1)
         static let blue = #colorLiteral(red: 0.09019608051, green: 0, blue: 0.3019607961, alpha: 1)
         static let red = #colorLiteral(red: 0.3176470697, green: 0.07450980693, blue: 0.02745098062, alpha: 1)
