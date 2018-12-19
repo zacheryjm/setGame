@@ -17,23 +17,22 @@ class ViewController: UIViewController {
     // MARK: actions
     @IBAction func NewGameButton(_ sender: UIButton) {
         game = SetGame()
-        initializeGrid()
+        initializeCardsInPlayViewGrid()
         updateView()
     }
     @IBAction func DealThreeCardsButton(_ sender: UIButton) {
-        dealThreeMoreCards()
+        dealMoreCards()
     }
     
     @IBAction func touchCard(_ sender: UITapGestureRecognizer) {
         guard let tappedCard = sender.view as? CardView else { return }
 
-        if let cardIndex = cardsInPlayView.subviews.index(of: tappedCard) {
-            
-            if game.selectedCards.contains(cardIndex) {
-                deselectCard(at: cardIndex)
+        if let cardViewIndex = cardsInPlayView.subviews.index(of: tappedCard) {
+            if game.selectedCards.contains(cardViewIndex) {
+                deselectCard(at: cardViewIndex)
             }
             else {
-                chooseCard(at: cardIndex)
+                chooseCard(at: cardViewIndex)
             }
             updateView()
         }
@@ -41,7 +40,7 @@ class ViewController: UIViewController {
     
     @IBAction func handleSwipeDown(_ sender: UISwipeGestureRecognizer) {
         if sender.state == .ended {
-            dealThreeMoreCards()
+            dealMoreCards()
             updateView()
         }
     }
@@ -60,13 +59,15 @@ class ViewController: UIViewController {
     // MARK: properties
     private lazy var game = SetGame()
     private lazy var grid = Grid(layout: .aspectRatio(CardSize.aspectRatio),frame: cardsInPlayView.bounds)
-
+    private var gameInitialized = false
     
     // MARK: public functions
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        initializeGrid()
+        if !gameInitialized {
+            initializeCardsInPlayViewGrid()
+        }
     }
     
     // MARK: private functions
@@ -82,7 +83,7 @@ class ViewController: UIViewController {
         scoreLabel.text = "Score: \(game.score)"
     }
     
-    private func initializeGrid() {
+    private func initializeCardsInPlayViewGrid() {
         grid.frame = cardsInPlayView.bounds
         grid.cellCount = game.playableCards.count
         
@@ -90,6 +91,16 @@ class ViewController: UIViewController {
             cardView.removeFromSuperview()
         }
         for index in 0..<grid.cellCount {
+            let card = game.playableCards[index]
+            addCardViewToGrid(at: index, for: card)
+        }
+        
+        gameInitialized = true
+    }
+    
+    private func updateCardsInPlayViewGrid() {
+        
+        for index in game.selectedCards {
             let card = game.playableCards[index]
             addCardViewToGrid(at: index, for: card)
         }
@@ -126,6 +137,16 @@ class ViewController: UIViewController {
         else {
             cardView.borderWidth = 0.0
         }
+        cardView.setNeedsDisplay()
+    }
+    
+    private func updateFramesForCardViews() {
+        
+        grid.cellCount = game.playableCards.count
+        
+        for index in cardsInPlayView.subviews.indices {
+            animateCardResize(for: index)
+        }
     }
     
     private func chooseCard(at index : Int) {
@@ -138,25 +159,34 @@ class ViewController: UIViewController {
         }
         //Not enough to check for set. Add to selected cards
         else {
-            game.selectedCards.append(index)
             updateCardBorder(for: index)
         }
     }
     
-    private func deselectCard(at index : Int) {
-        if let indexToRemove = game.selectedCards.index(of: index) {
+    private func deselectCard(at cardViewIndex : Int) {
+        if let indexToRemove = game.selectedCards.index(of: cardViewIndex) {
             game.selectedCards.remove(at: indexToRemove)
-            updateCardBorder(for: index)
+            updateCardBorder(for: cardViewIndex)
         }
     }
     
     private func checkForSet() {
         if game.checkForSet() {
             updateGameStateAfterSetMatched()
+            updateGridAfterMatch()
         }
         else {
             game.score -= 1
         }
+    }
+    
+    private func updateGridAfterMatch() {
+        for matchedCard in game.selectedCards {
+            matchedCardAnimation(for: matchedCard)
+            let cardView = cardsInPlayView.subviews[matchedCard] as! CardView
+            cardView.removeFromSuperview()
+        }
+        updateCardsInPlayViewGrid()
     }
     
     private func updateGameStateAfterSetMatched() {
@@ -164,17 +194,14 @@ class ViewController: UIViewController {
         
         let selectedCardsSortedDecending = game.selectedCards.sorted(by: { $0 > $1 })
         
-        for i in selectedCardsSortedDecending.indices {
+        for selectedCardIndex in selectedCardsSortedDecending {
             
             if !game.deck.isEmpty {
-                matchedCardAnimation(for: selectedCardsSortedDecending[i])
-                addCardViewToGrid(at: selectedCardsSortedDecending[i], for: game.deck[game.TOPCARD])
-                game.playableCards[selectedCardsSortedDecending[i]] = game.deck[game.TOPCARD]
+                game.playableCards[selectedCardIndex] = game.deck[game.TOPCARD]
                 game.deck.remove(at: game.TOPCARD)
             }
             else {
-                game.playableCards.remove(at: selectedCardsSortedDecending[i])
-                
+                game.playableCards.remove(at: selectedCardIndex)
             }
         }
         if game.playableCards.isEmpty && game.deck.isEmpty {
@@ -182,16 +209,21 @@ class ViewController: UIViewController {
         }
     }
     
-    private func dealThreeMoreCards() {
+    private func dealMoreCards() {
         
+        var numberOfCardsToDeal = 0
         for _ in 0..<3 {
             if !game.deck.isEmpty {
                 game.playableCards.append(game.deck[game.TOPCARD])
                 game.deck.remove(at: game.TOPCARD)
+                numberOfCardsToDeal += 1
             }
         }
-        
-        initializeGrid()
+        updateFramesForCardViews()
+        for index in game.playableCards.count-numberOfCardsToDeal..<game.playableCards.count {
+            let card = game.playableCards[index]
+            addCardViewToGrid(at: index, for: card)
+        }
     }
     
     //MARK: Animations
@@ -201,7 +233,7 @@ class ViewController: UIViewController {
         let cardToAnimate = cardsInPlayView.subviews[index] as! CardView
         let animationDelay = 0.1 * Double(exactly: index)!
         
-        UIView.animate(withDuration: 2.0,
+        UIView.animate(withDuration: 1.2,
                        delay: animationDelay,
                        options: .curveEaseInOut,
                        animations: {
@@ -226,18 +258,29 @@ class ViewController: UIViewController {
     
     private func matchedCardAnimation(for index : Int) {
         let matchedCard = cardsInPlayView.subviews[index] as! CardView
+        matchedCard.isMatched = true
         
         UIView.transition(with: matchedCard,
                           duration: 0.6,
                           options: .curveEaseOut,
                           animations: {
                             matchedCard.alpha = 0.0
-                            
-                            },
-                          completion: { _ in
-                            matchedCard.removeFromSuperview()
-        })
+                            })
 
+    }
+    
+    private func animateCardResize(for cardIndex : Int) {
+        
+        let cardView = cardsInPlayView.subviews[cardIndex] as! CardView
+
+        UIView.animate(withDuration: 0.6,
+                       delay: 0.0,
+                       options: .curveLinear,
+                       animations: {
+                        let cellFrame = self.grid[cardIndex]!
+                        cardView.frame = cellFrame.insetBy(dx: CardSize.inset, dy: CardSize.inset)
+        })
+        
     }
     
     
