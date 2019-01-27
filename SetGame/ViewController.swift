@@ -26,7 +26,7 @@ class ViewController: UIViewController {
     
     @IBAction func touchCard(_ sender: UITapGestureRecognizer) {
         guard let tappedCard = sender.view as? CardView else { return }
-
+        
         if let cardViewIndex = cardsInPlayView.subviews.index(of: tappedCard) {
             if game.selectedCards.contains(cardViewIndex) {
                 deselectCard(at: cardViewIndex)
@@ -98,30 +98,29 @@ class ViewController: UIViewController {
         gameInitialized = true
     }
     
-    private func updateCardsInPlayViewGrid() {
+    private func addCardViewToGrid(at index : Int, for card : Card) {
         
-        for index in game.selectedCards {
-            let card = game.playableCards[index]
-            addCardViewToGrid(at: index, for: card)
-        }
-    }
-    
-    private func addCardViewToGrid(at gridIndex : Int, for card : Card) {
-        
-        let deckFrame = deckButton.convert(deckButton.frame, to: cardsInPlayView)
-        
-        if let cellFrame = grid[gridIndex] {
-            let cardView = CardView(frame: deckFrame,
-                                    color : card.color, number : card.number,
-                                    shading :  card.shading, shape : card.shape)
+        if let cellFrame = grid[index] {
+            let cardView = createCardView(at: index, for: card)
             
-            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(touchCard(_:))))
-            cardsInPlayView.addSubview(cardView)
-            dealCardAnimation(for: gridIndex, with: cellFrame)
+            cardsInPlayView.insertSubview(cardView, at: index)
+            dealCardAnimation(for: index, with: cellFrame)
         }
         else {
             print("grid[\(index)] does not exist")
         }
+    }
+    
+    private func createCardView(at index : Int, for card : Card) -> CardView {
+        let deckFrame = deckButton.convert(deckButton.frame, to: cardsInPlayView)
+        
+        let cardView = CardView(frame: deckFrame,
+                                color : card.color, number : card.number,
+                                shading :  card.shading, shape : card.shape)
+        
+        cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(touchCard(_:))))
+        
+        return cardView
     }
     
     private func updateCardBorder(for cardIndex : Int) {
@@ -149,6 +148,7 @@ class ViewController: UIViewController {
         }
     }
     
+    //TODO: Update border after incorrect guess
     private func chooseCard(at index : Int) {
         game.selectedCards.append(index)
 
@@ -157,10 +157,9 @@ class ViewController: UIViewController {
             checkForSet()
             game.selectedCards.removeAll()
         }
-        //Not enough to check for set. Add to selected cards
-        else {
-            updateCardBorder(for: index)
-        }
+        
+        updateCardBorder(for: index)
+        
     }
     
     private func deselectCard(at cardViewIndex : Int) {
@@ -173,22 +172,13 @@ class ViewController: UIViewController {
     private func checkForSet() {
         if game.checkForSet() {
             updateGameStateAfterSetMatched()
-            updateGridAfterMatch()
+            updateViewAfterSetMatched()
         }
         else {
             game.score -= 1
         }
     }
-    
-    private func updateGridAfterMatch() {
-        for matchedCard in game.selectedCards {
-            matchedCardAnimation(for: matchedCard)
-            let cardView = cardsInPlayView.subviews[matchedCard] as! CardView
-            cardView.removeFromSuperview()
-        }
-        updateCardsInPlayViewGrid()
-    }
-    
+
     private func updateGameStateAfterSetMatched() {
         game.score += 1
         
@@ -197,8 +187,7 @@ class ViewController: UIViewController {
         for selectedCardIndex in selectedCardsSortedDecending {
             
             if !game.deck.isEmpty {
-                game.playableCards[selectedCardIndex] = game.deck[game.TOPCARD]
-                game.deck.remove(at: game.TOPCARD)
+                game.playableCards[selectedCardIndex] = game.deck.remove(at: game.TOPCARD)
             }
             else {
                 game.playableCards.remove(at: selectedCardIndex)
@@ -207,6 +196,23 @@ class ViewController: UIViewController {
         if game.playableCards.isEmpty && game.deck.isEmpty {
             game.gameOver = true
         }
+    }
+    
+    private func updateViewAfterSetMatched() {
+        
+        for matchedCardIndex in game.selectedCards {
+            matchedCardAnimation(for: matchedCardIndex)
+            removeCardFromSuperView(for: matchedCardIndex)
+            
+            let card = game.playableCards[matchedCardIndex]
+            addCardViewToGrid(at: matchedCardIndex, for: card)
+            
+        }
+    }
+    
+    private func removeCardFromSuperView(for index: Int) {
+        let matchedCardView = cardsInPlayView.subviews[index] as! CardView
+        matchedCardView.removeFromSuperview()
     }
     
     private func dealMoreCards() {
